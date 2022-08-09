@@ -33,10 +33,10 @@ etc.
 9. Click "Update" whenever you want a word/character count.
 
 <b>Wordcounter in action</b> (on WORKSHOP 2022 leftover science questions):
-<img width="1572" alt="wordcounter_in_action" src="https://user-images.githubusercontent.com/8041675/183764279-c593c586-1cfa-4b96-b79c-f11e18280b82.png">
-
+<img width="1572" alt="wordcounter_in_action" src="https://user-images.githubusercontent.com/8041675/183766831-d360f822-da96-4b01-891a-3bee89f4b74f.png">
 
 <b>Features:</b>
+
 
 Automatically excludes:
 
