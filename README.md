@@ -49,11 +49,13 @@ Automatically excludes:
 
 Additional features:
 
--highlights in red things that are above a modifiable word/character count limit. To modify the limits, go to line 59 of wordcounter.gs (var MAX_WORDS_TU = 135;) and enter whatever you want, as well as on the subsequent 3 lines.
+-highlights in red things that are above a modifiable word/character count limit.
 
 -expand/contract subcategories by clicking on anything in the subcategory.
 
+-toggle viewing only questions that are too long or all questions.
 
 
-I'll add something so you don't have to go into the script to change the limits at some point, other than that feel free to discord me/message me/github (?) me with feature requests.
+
+feel free to discord me/message me/github (?) me with feature requests.
 
