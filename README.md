@@ -4,17 +4,21 @@ A Google Docs Add-On to calculate the word and character count of all quizbowl q
 
 The script currently only works if the doc is formatted with subcategories as Header 1, with "Tossups" and "Bonuses" as Header 2 within each subcategory, e.g.:
 
-<Header 1>Biology</Header 1>
-<Header 2>Tossups</Header 2>
+\<Header 1\>Biology\</Header 1\>
+
+\<Header 2\>Tossups\</Header 2\>
+
 bio tossup 1
 
 bio tossup 2
 
-<Header 2>Bonuses</Header 2>
+\<Header 2\>Bonuses\</Header 2\>
+
 bio bonus 1
 
 bio bonus 2
-<Header 1>Chemistry</Header 1>
+
+\<Header 1\>Chemistry\</Header 1\>
 etc.
 
 To use:
@@ -30,15 +34,26 @@ To use:
 
 
 Features:
+
 Automatically excludes:
+
 -description acceptable/note to player or moderator prompts at the beginning of questions/bonus parts.
+
 -pronunciation guides
+
 -answerlines within bonuses
+
 -[10] or [10e/m/h] at beginning of bonus parts
+
 -weird formatting (e.g. double spaces after sentences).
+
 Additional features:
+
 -highlights in red things that are above a modifiable word/character count limit. To modify the limits, go to line 59 of wordcounter.gs (var MAX_WORDS_TU = 135;) and enter whatever you want, as well as on the subsequent 3 lines.
+
 -expand/contract subcategories by clicking on anything in the subcategory.
+
+
 
 I'll add something so you don't have to go into the script to change the limits at some point, other than that feel free to discord me/message me/github (?) me with feature requests.
 
