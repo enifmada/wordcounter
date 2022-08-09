@@ -21,7 +21,7 @@ bio bonus 2
 \<Header 1\>Chemistry\</Header 1\>
 etc.
 
-To use:
+<b>To use:</b>
 1. Open the relevant Google Doc
 2. Go to Extensions -> Apps Script
 3. Copy wordcounter.gs and sidebar.html into the Apps Script workspace and save
@@ -32,11 +32,11 @@ To use:
 8. Click the "Wordcounter" script under Extensions again, you should get a sidebar that pops out
 9. Click "Update" whenever you want a word/character count.
 
-Wordcounter in action (on WORKSHOP 2022 leftover science questions):
+<b>Wordcounter in action</b> (on WORKSHOP 2022 leftover science questions):
 <img width="1572" alt="wordcounter_in_action" src="https://user-images.githubusercontent.com/8041675/183764279-c593c586-1cfa-4b96-b79c-f11e18280b82.png">
 
 
-Features:
+<b>Features:</b>
 
 Automatically excludes:
 
@@ -58,7 +58,7 @@ Additional features:
 
 -toggle viewing only questions that are too long or all questions.
 
+<br>
 
-
-feel free to discord me/message me/github (?) me with feature requests.
+feel free to discord me/message me/github (?) me with feature requests!
 
