@@ -55,11 +55,7 @@ function showSidebar() {
  *
  * @return {Array.<string>} The selected text.
  */
-function processPars(){
-  var MAX_WORDS_TU = 135;
-  var MAX_WORDS_BO = 150;
-  var MAX_CHARS_TU = 1500;
-  var MAX_CHARS_BO = 1500;
+function processPars(tu_words, tu_chars, bo_words, bo_chars){
 
   var h1 = DocumentApp.ParagraphHeading.HEADING1;
   var h2 = DocumentApp.ParagraphHeading.HEADING2;
@@ -97,48 +93,83 @@ function processPars(){
         wordlengths = [];
         charlengths = [];
         valid = [];
+        bonuscounter = 0;
+        bonuswordlength = 0;
+        bonuscharlength = 0;
+        bonusanswers = "";
     }
     else if (parhead == h2){
       context = partext.toLowerCase();
     }
     else{
-      if (partext.substr(0, 1) == "<"){
+      if (partext.slice(0, 1) == "<"){
         continue;
       }
       if (context == "tossups"){
-        if (partext.substr(0, 7) == "ANSWER:"){
-          answers.push(extractPrimaryAnswer(partext.substr(8)));
+        if (partext.slice(0, 7) == "ANSWER:"){
+          answers.push(extractPrimaryAnswer(partext.slice(8)));
 
         }
         else{
           sanitized_text = removeInstructions(partext, par.editAsText().isItalic(0));
+          var answerloc = sanitized_text.indexOf("ANSWER:");
+          if (answerloc > -1){
+            answerslice = sanitized_text.slice(answerloc);
+            answers.push(extractPrimaryAnswer(answerslice.slice(8)));
+            sanitized_text = sanitized_text.slice(0, answerloc);
+          }
           charlengths.push(sanitized_text.length);
           wordlengths.push(sanitized_text.split(" ").length);
           var validpush = "good";
-          if (sanitized_text.length > MAX_CHARS_TU || sanitized_text.split(" ").length > MAX_WORDS_TU){
+          if (sanitized_text.length > tu_chars || sanitized_text.split(" ").length > tu_words){
             validpush = "bad";
           }
           valid.push(validpush);
         }
       }
       else{
-        if (partext.substr(0,1) == "[")
+        if (partext.slice(0,1) == "[")
         {
           endbracket = partext.indexOf("]");
-          sanitized_text = removeInstructions(partext.substr(endbracket+2), par.editAsText().isItalic(endbracket+2))
-          bonuscharlength += sanitized_text.length;
-          bonuswordlength += sanitized_text.split(" ").length;
-        }
-        else{
-          if(partext.substr(0,7) == "ANSWER:"){
+          sanitized_text = removeInstructions(partext.slice(endbracket+2), par.editAsText().isItalic(endbracket+2))
+          var answerloc = sanitized_text.indexOf("ANSWER:");
+          if (answerloc > -1){
+            answerslice = sanitized_text.slice(answerloc);
+            sanitized_text = sanitized_text.slice(0, answerloc);
+            bonuscharlength += sanitized_text.length;
+            bonuswordlength += sanitized_text.split(" ").length;
             bonuscounter += 1;
-            bonusanswers += "/"+extractPrimaryAnswer(partext.substr(8));
+            bonusanswers += "/"+extractPrimaryAnswer(answerslice.slice(8));
             if (bonuscounter >= 3){
               wordlengths.push(bonuswordlength);
               charlengths.push(bonuscharlength);
-              answers.push(bonusanswers.substr(1));
+              answers.push(bonusanswers.slice(1));
               var validpush = "good";
-              if (bonuscharlength > MAX_CHARS_BO || bonuswordlength > MAX_WORDS_BO){
+              if (bonuscharlength > bo_chars || bonuswordlength > bo_words){
+                validpush = "bad";
+              }
+              valid.push(validpush);
+              bonuscounter = 0;
+              bonuswordlength = 0;
+              bonuscharlength = 0;
+              bonusanswers = "";
+            }
+          }
+          else{
+          bonuscharlength += sanitized_text.length;
+          bonuswordlength += sanitized_text.split(" ").length;}
+        }
+        else{
+          if(partext.slice(0,7) == "ANSWER:"){
+            
+            bonuscounter += 1;
+            bonusanswers += "/"+extractPrimaryAnswer(partext.slice(8));
+            if (bonuscounter >= 3){
+              wordlengths.push(bonuswordlength);
+              charlengths.push(bonuscharlength);
+              answers.push(bonusanswers.slice(1));
+              var validpush = "good";
+              if (bonuscharlength > bo_chars || bonuswordlength > bo_words){
                 validpush = "bad";
               }
               valid.push(validpush);
@@ -167,15 +198,15 @@ function processPars(){
 function removeInstructions(text, startitalic){
   while (text.indexOf('("') >= 0)
   {
-    text = text.substr(0, text.indexOf('("')) + text.substr(text.indexOf('")')+3);
+    text = text.slice(0, text.indexOf('("')) + text.slice(text.indexOf('")')+3);
   }
   powermarkloc = text.indexOf("(*)");
   if (powermarkloc >= 0){
-    text = text.substr(0, powermarkloc) + text.substr(powermarkloc+4)
+    text = text.slice(0, powermarkloc) + text.slice(powermarkloc+4)
   }
   if (startitalic){
     if (text.indexOf('Note to') == 0 || text.indexOf('Description acceptable') == 0){
-      text = text.substr(text.indexOf(".")+2);
+      text = text.slice(text.indexOf(".")+2);
     }
   }
   return text.trim().replace(/\s{2,}/g, ' ');
@@ -185,23 +216,18 @@ function extractPrimaryAnswer(answertext){
   bracket_start = answertext.indexOf("[");
   paren_start = answertext.indexOf("(");
   if (paren_start == 0 ){
-    answertext = answertext.substr(answertext.indexOf(")")+1);
+    answertext = answertext.slice(answertext.indexOf(")")+1);
     paren_start = answertext.indexOf("(");
     bracket_start = answertext.indexOf("[");
   }
   if (bracket_start > -1 && paren_start > -1){
-    answertext = answertext.substr(0, Math.min(bracket_start, paren_start)-1);
+    answertext = answertext.slice(0, Math.min(bracket_start, paren_start)-1);
   }
   else if (bracket_start > -1){
-    answertext = answertext.substr(0, bracket_start-1);
+    answertext = answertext.slice(0, bracket_start-1);
   }
   else if (paren_start > -1){
-    answertext = answertext.substr(0, paren_start-1);
+    answertext = answertext.slice(0, paren_start-1);
   }
   return answertext.trim().replace(/\s{2,}/g, ' ');
-}
-
-function getAllCounts() {
-  var processed_pars = processPars();
-  return processed_pars;
 }
