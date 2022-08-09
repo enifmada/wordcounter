@@ -32,6 +32,9 @@ To use:
 8. Click the "Wordcounter" script under Extensions again, you should get a sidebar that pops out
 9. Click "Update" whenever you want a word/character count.
 
+Wordcounter in action (on WORKSHOP 2022 leftover science questions):
+<img width="1572" alt="wordcounter_in_action" src="https://user-images.githubusercontent.com/8041675/183764279-c593c586-1cfa-4b96-b79c-f11e18280b82.png">
+
 
 Features:
 
