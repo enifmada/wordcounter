@@ -37,8 +37,26 @@
 <body>
 <div class="sidebar branding-below">
   <form>
+    Tossup cap
+    <br>
+    <label for="TU-W">Words:</label>
+    <input type="text" id="TU-W" name="TU-W", size=4px, value=150>
+    <label for="TU-C">Chars:</label>
+    <input type="text" id="TU-C" name="TU-C", size=4px, value=800><br>
+    Bonus cap
+    <br>
+    <label for="BO-W">Words:</label>
+    <input type="text" id="BO-W" name="BO-W", size=4px, value=200>
+    <label for="BO-C">Chars:</label>
+    <input type="text" id="BO-C" name="BO-C", size=4px, value=850><br>
+    <br>
     <div class="block" id="button-bar">
       <button class="blue" id="update-counts">Update</button>
+    </div>
+    <div class="block" id="cb-bar">
+    <label for="accept">
+    <input type="checkbox" id="toolong-cb" name="accept" value="no"> Show only too-long questions
+    </label>
     </div>
     <div class="block" id="nothing">
     </div>
@@ -57,6 +75,7 @@
    */
   $(function() {
     $('#update-counts').click(updateCounts);
+    $('#toolong-cb').click(updateVisibility);
   });
 
   /**
@@ -79,22 +98,39 @@
                       element.disabled = false;
                     })
             .withUserObject(this)
-            .getAllCounts();
+            .processPars(document.querySelector('#TU-W').value, document.querySelector('#TU-C').value, document.querySelector('#BO-W').value, document.querySelector('#BO-C').value);
   }
 
   function toggleChildren(element)
   {
-    questions = element.children;
-    var visibletf = questions[1].style.display;
+    var questions = element.children;
     var opp_vis = null;
-    if (visibletf=="none"){
-      opp_vis = "block";
+    if (element.intvis=="vis"){
+      opp_vis = "none";
+      element.intvis="invis";
      }
      else{
-       opp_vis = "none";
+       opp_vis = "block";
+       element.intvis="vis";
      }
     for (i=1;i<questions.length;i++){
       questions[i].style.display = opp_vis;
+    }
+    if (opp_vis=="block"){
+    updateOneVisibility(element);}
+  }
+
+  function refreshChildren(element){
+    var questions = element.children;
+    var same_vis = null;
+    if (element.intvis=="vis"){
+      same_vis = "block";
+     }
+     else{
+       same_vis = "none";
+     }
+    for (i=1;i<questions.length;i++){
+      questions[i].style.display = same_vis;
     }
   }
   /**
@@ -117,10 +153,61 @@
     div += '</div>';
     $(element).before(div);
     }
+    var headers = document.querySelectorAll(".result");
+    headers.forEach(function(element){
+        element.intvis = "vis";
+    });
     var elements = document.querySelectorAll('.bad');
     elements.forEach(function(element){
         element.style.color = "red";
     });
+    updateVisibility();
+  }
+
+  function updateVisibility()
+  {
+    var cb_check = document.querySelector('#toolong-cb').checked;
+    var opp_vis = "block";
+    var color = "red";
+    if (cb_check){
+      opp_vis = "none";
+      color = "black";
+    }
+
+    var headers = document.querySelectorAll(".result");
+    headers.forEach(function(element){
+      if (element.intvis=="vis"){
+        subelements = element.querySelectorAll('.good');
+        subelements.forEach(function(subelement){
+          subelement.style.display = opp_vis;
+        });
+        }
+    });
+
+    var bad_elements = document.querySelectorAll('.bad');
+    bad_elements.forEach(function(element){
+      element.style.color = color;
+    });
+  }
+
+  function updateOneVisibility(element)
+  {
+    var cb_check = document.querySelector('#toolong-cb').checked;
+    var opp_vis = "block";
+    var color = "red";
+    if (cb_check){
+      opp_vis = "none";
+      color = "black";
+    }
+    var elements = element.querySelectorAll('.good');
+    elements.forEach(function(element){
+      element.style.display = opp_vis;
+    })
+
+    var bad_elements = element.querySelectorAll('.bad');
+    bad_elements.forEach(function(element){
+      element.style.color = color;
+    })
   }
 </script>
 </body>
