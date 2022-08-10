@@ -196,8 +196,9 @@ function extractPrimaryAnswer(answertext){
 function splitComponent(partext)
 {
   var final_par_array = [];
-  par_array_1 = partext.split("/\[10[emh]\]/")
+  par_array_1 = partext.split(/\[10[emh]?\]/g)
   for(var i=0;i<par_array_1.length;i++){
+    if(par_array_1[i].length < 3){continue}
     answerloc = par_array_1[i].indexOf("ANSWER:");
     if (answerloc > 0){
     final_par_array.push(par_array_1[i].slice(0, answerloc));
