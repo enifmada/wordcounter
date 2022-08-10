@@ -59,6 +59,7 @@ function processPars(tu_words, tu_chars, bo_words, bo_chars){
 
   var h1 = DocumentApp.ParagraphHeading.HEADING1;
   var h2 = DocumentApp.ParagraphHeading.HEADING2;
+  var norm = DocumentApp.ParagraphHeading.NORMAL;
 
   var all_qs = [];
   var cat = null;
@@ -66,11 +67,13 @@ function processPars(tu_words, tu_chars, bo_words, bo_chars){
   var wordlengths = [];
   var charlengths = [];
   var valid = [];
-  var context = "tossups";
-  var bonuscounter = 0;
-  var bonuswordlength = 0;
-  var bonuscharlength = 0;
-  var bonusanswers = "";
+  var temp_cl = 0;
+  var temp_wl = 0;
+  var temp_answers = "";
+  var question_array = [];
+  var answer_array = [];
+  const bonus_question_locs = [0,1,3,5];
+  const bonus_answer_locs = [2,4,6];
 
   const doc = DocumentApp.getActiveDocument();
   const body = doc.getBody();
@@ -93,100 +96,60 @@ function processPars(tu_words, tu_chars, bo_words, bo_chars){
         wordlengths = [];
         charlengths = [];
         valid = [];
-        bonuscounter = 0;
-        bonuswordlength = 0;
-        bonuscharlength = 0;
-        bonusanswers = "";
     }
-    else if (parhead == h2){
-      context = partext.toLowerCase();
+    else if (parhead != norm || partext.slice(0, 1) == "<"){
+      continue;
     }
     else{
-      if (partext.slice(0, 1) == "<"){
-        continue;
+      q_label = partext.indexOf(". ");
+      if(q_label == 1 || q_label == 2)
+      {
+        partext=partext.slice(q_label+2);
       }
-      if (context == "tossups"){
-        if (partext.slice(0, 7) == "ANSWER:"){
-          answers.push(extractPrimaryAnswer(partext.slice(8)));
-
-        }
-        else{
-          sanitized_text = removeInstructions(partext, par.editAsText().isItalic(0));
-          var answerloc = sanitized_text.indexOf("ANSWER:");
-          if (answerloc > -1){
-            answerslice = sanitized_text.slice(answerloc);
-            answers.push(extractPrimaryAnswer(answerslice.slice(8)));
-            sanitized_text = sanitized_text.slice(0, answerloc);
-          }
-          charlengths.push(sanitized_text.length);
-          wordlengths.push(sanitized_text.split(" ").length);
-          var validpush = "good";
-          if (sanitized_text.length > tu_chars || sanitized_text.split(" ").length > tu_words){
-            validpush = "bad";
-          }
-          valid.push(validpush);
-        }
-      }
-      else{
-        if (partext.slice(0,1) == "[")
+      partext_array = splitComponent(partext);
+      for(var i=0;i<partext_array.length;i++)
+      {
+        if (partext_array[i].slice(0,7) != "ANSWER:")
         {
-          endbracket = partext.indexOf("]");
-          sanitized_text = removeInstructions(partext.slice(endbracket+2), par.editAsText().isItalic(endbracket+2))
-          var answerloc = sanitized_text.indexOf("ANSWER:");
-          if (answerloc > -1){
-            answerslice = sanitized_text.slice(answerloc);
-            sanitized_text = sanitized_text.slice(0, answerloc);
-            bonuscharlength += sanitized_text.length;
-            bonuswordlength += sanitized_text.split(" ").length;
-            bonuscounter += 1;
-            bonusanswers += "/"+extractPrimaryAnswer(answerslice.slice(8));
-            if (bonuscounter >= 3){
-              wordlengths.push(bonuswordlength);
-              charlengths.push(bonuscharlength);
-              answers.push(bonusanswers.slice(1));
-              var validpush = "good";
-              if (bonuscharlength > bo_chars || bonuswordlength > bo_words){
-                validpush = "bad";
-              }
-              valid.push(validpush);
-              bonuscounter = 0;
-              bonuswordlength = 0;
-              bonuscharlength = 0;
-              bonusanswers = "";
-            }
-          }
-          else{
-          bonuscharlength += sanitized_text.length;
-          bonuswordlength += sanitized_text.split(" ").length;}
+          question_array.push(removeInstructions(partext_array[i]));
+          answer_array.push(false);
         }
         else{
-          if(partext.slice(0,7) == "ANSWER:"){
-            
-            bonuscounter += 1;
-            bonusanswers += "/"+extractPrimaryAnswer(partext.slice(8));
-            if (bonuscounter >= 3){
-              wordlengths.push(bonuswordlength);
-              charlengths.push(bonuscharlength);
-              answers.push(bonusanswers.slice(1));
-              var validpush = "good";
-              if (bonuscharlength > bo_chars || bonuswordlength > bo_words){
-                validpush = "bad";
-              }
-              valid.push(validpush);
-              bonuscounter = 0;
-              bonuswordlength = 0;
-              bonuscharlength = 0;
-              bonusanswers = "";
-            }
-          }
-          else{
-            sanitized_text = removeInstructions(partext, par.editAsText().isItalic(0))
-            bonuscharlength += sanitized_text.length;
-            bonuswordlength += sanitized_text.split(" ").length;
-          }
+          question_array.push(extractPrimaryAnswer(partext_array[i].slice(8)));
+          answer_array.push(true);
         }
-
-        continue;
+        if (question_array.length == 2 && answer_array[1] == true)
+        {
+          answers.push(question_array[1]);
+          charlengths.push(question_array[0].length);
+          wordlengths.push(question_array[0].split(" ").length);
+          if (question_array[0].length > tu_chars || question_array[0].split(" ").length > tu_words){valid.push("bad");}
+          else{valid.push("good");}
+          question_array = [];
+          answer_array = [];
+        }
+        else if (question_array.length == 7 && answer_array[6] == true)
+        {
+          temp_answers = "";
+          temp_cl = 0;
+          temp_wl = 0;
+          for (var bl = 0; bl<bonus_question_locs.length;bl++)
+          {
+            temp_cl += question_array[bonus_question_locs[bl]].length;
+            temp_wl += question_array[bonus_question_locs[bl]].split(" ").length;
+          }
+          for (var al = 0; al<bonus_answer_locs.length;al++)
+          {
+            temp_answers += "/"+question_array[bonus_answer_locs[al]];
+          }
+          answers.push(temp_answers.slice(1));
+          charlengths.push(temp_cl);
+          wordlengths.push(temp_wl);
+          if (temp_cl > bo_chars || temp_wl > bo_words){valid.push("bad");}
+          else{valid.push("good");}
+          question_array = [];
+          answer_array = [];
+        }
       }
     }
   }
@@ -195,7 +158,7 @@ function processPars(tu_words, tu_chars, bo_words, bo_chars){
 }
 
 
-function removeInstructions(text, startitalic){
+function removeInstructions(text){
   while (text.indexOf('("') >= 0)
   {
     text = text.slice(0, text.indexOf('("')) + text.slice(text.indexOf('")')+3);
@@ -204,10 +167,8 @@ function removeInstructions(text, startitalic){
   if (powermarkloc >= 0){
     text = text.slice(0, powermarkloc) + text.slice(powermarkloc+4)
   }
-  if (startitalic){
-    if (text.indexOf('Note to') == 0 || text.indexOf('Description acceptable') == 0){
-      text = text.slice(text.indexOf(".")+2);
-    }
+  if (text.indexOf('Note to') == 0 || text.indexOf('Description acceptable') == 0){
+    text = text.slice(text.indexOf(".")+2);
   }
   return text.trim().replace(/\s{2,}/g, ' ');
 }
@@ -230,4 +191,21 @@ function extractPrimaryAnswer(answertext){
     answertext = answertext.slice(0, paren_start-1);
   }
   return answertext.trim().replace(/\s{2,}/g, ' ');
+}
+
+function splitComponent(partext)
+{
+  var final_par_array = [];
+  par_array_1 = partext.split("/\[10[emh]\]/")
+  for(var i=0;i<par_array_1.length;i++){
+    answerloc = par_array_1[i].indexOf("ANSWER:");
+    if (answerloc > 0){
+    final_par_array.push(par_array_1[i].slice(0, answerloc));
+    final_par_array.push(par_array_1[i].slice(answerloc));
+    }
+    else{
+      final_par_array.push(par_array_1[i]);
+    }
+  }
+  return final_par_array;
 }
