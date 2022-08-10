@@ -1,25 +1,6 @@
 # wordcounter
 
-A Google Docs Add-On to calculate the word and character count of all quizbowl questions in a Google Doc. Primarily intended for subject docs rather than final packets.
-
-The script currently only works if the doc is formatted with subcategories as Header 1, with "Tossups" and "Bonuses" as Header 2 within each subcategory, e.g.:
-
-\<Header 1\>Biology\</Header 1\>
-
-\<Header 2\>Tossups\</Header 2\>
-
-bio tossup 1
-
-bio tossup 2
-
-\<Header 2\>Bonuses\</Header 2\>
-
-bio bonus 1
-
-bio bonus 2
-
-\<Header 1\>Chemistry\</Header 1\>
-etc.
+A Google Docs Add-On to calculate the word and character count of all quizbowl questions in a Google Doc.
 
 <b>To use:</b>
 1. Open the relevant Google Doc
@@ -54,7 +35,7 @@ Additional features:
 
 -highlights in red things that are above a modifiable word/character count limit.
 
--expand/contract subcategories by clicking on anything in the subcategory.
+-if the doc contains subcategories formatted with "Heading 1" text, the outputted question list will reflect this; furthermore, you can expand/contract subcategories by clicking on anything in the subcategory.
 
 -toggle viewing only questions that are too long or all questions.
 
