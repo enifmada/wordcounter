@@ -62,7 +62,7 @@ function processPars(tu_words, tu_chars, bo_words, bo_chars){
   var norm = DocumentApp.ParagraphHeading.NORMAL;
 
   var all_qs = [];
-  var cat = null;
+  var cat = "start";
   var answers = [];
   var wordlengths = [];
   var charlengths = [];
@@ -157,7 +157,13 @@ function processPars(tu_words, tu_chars, bo_words, bo_chars){
     }
   }
   all_qs.push({cat: cat, answers: answers, wordlengths: wordlengths, charlengths: charlengths, valid: valid});
-  return all_qs.slice(1);
+  for(i=all_qs.length-1;i>-1;i--){
+    if (all_qs[i].answers.length < 1)
+    {
+      all_qs.splice(i, 1);
+    }
+  }
+  return all_qs;
 }
 
 
@@ -199,7 +205,7 @@ function extractPrimaryAnswer(answertext){
 function splitComponent(partext)
 {
   var final_par_array = [];
-  par_array_1 = partext.split(/\[10[emh]?\]/g)
+  par_array_1 = partext.replace(/<.*?>/g, "").split(/\[10[emh]?\]/g)
   for(var i=0;i<par_array_1.length;i++){
     if(par_array_1[i].length < 3){continue}
     answerloc = par_array_1[i].indexOf("ANSWER:");
