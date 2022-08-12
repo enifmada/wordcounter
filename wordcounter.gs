@@ -92,7 +92,7 @@ function processPars(tu_words, tu_chars, bo_words, bo_chars){
     if (par.editAsText().isItalic()){
       continue;
     }
-    if (parhead != norm){
+    if (parhead == h1){
         all_qs.push({cat: cat, answers: answers, wordlengths: wordlengths, charlengths: charlengths, valid: valid});
         cat = partext;
         answers = [];
@@ -100,7 +100,7 @@ function processPars(tu_words, tu_chars, bo_words, bo_chars){
         charlengths = [];
         valid = [];
     }
-    else if (partext.slice(0, 1) == "<"){
+    else if (parhead != norm || partext.slice(0, 1) == "<"){
       continue;
     }
     else{
@@ -171,6 +171,10 @@ function removeInstructions(text){
   while (text.indexOf('("') >= 0)
   {
     text = text.slice(0, text.indexOf('("')) + text.slice(text.indexOf('")')+3);
+  }
+  while (text.indexOf('(“') >= 0)
+  {
+    text = text.slice(0, text.indexOf('(“')) + text.slice(text.indexOf('”)')+3);
   }
   powermarkloc = text.indexOf("(*)");
   if (powermarkloc >= 0){
