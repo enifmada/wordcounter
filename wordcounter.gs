@@ -84,7 +84,7 @@ function processPars(tu_words, tu_chars, bo_words, bo_chars){
   while (searchResult = body.findElement(searchType, searchResult)) {
     var par = searchResult.getElement().asParagraph();
     var parhead = par.getHeading();
-    var partext = par.getText();
+    var partext = removeInstructions(par.getText());
   
     if (partext.length < 2){
       continue;
@@ -92,7 +92,8 @@ function processPars(tu_words, tu_chars, bo_words, bo_chars){
     if (par.editAsText().isItalic()){
       continue;
     }
-    if (parhead == h1){
+    if partext.
+    if (parhead != norm){
         all_qs.push({cat: cat, answers: answers, wordlengths: wordlengths, charlengths: charlengths, valid: valid});
         cat = partext;
         answers = [];
