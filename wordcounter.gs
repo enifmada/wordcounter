@@ -92,8 +92,7 @@ function processPars(tu_words, tu_chars, bo_words, bo_chars){
     if (par.editAsText().isItalic()){
       continue;
     }
-    if partext.
-    if (parhead != norm){
+    if (parhead == h1){
         all_qs.push({cat: cat, answers: answers, wordlengths: wordlengths, charlengths: charlengths, valid: valid});
         cat = partext;
         answers = [];
