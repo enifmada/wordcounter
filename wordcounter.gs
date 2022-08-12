@@ -100,7 +100,7 @@ function processPars(tu_words, tu_chars, bo_words, bo_chars){
         charlengths = [];
         valid = [];
     }
-    else if (parhead != norm || partext.slice(0, 1) == "<"){
+    else if (partext.slice(0, 1) == "<"){
       continue;
     }
     else{
