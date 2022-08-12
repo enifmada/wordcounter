@@ -77,7 +77,8 @@
     $('#update-counts').click(updateCounts);
     $('#toolong-cb').click(updateVisibility);
   });
-
+  
+  var red_color = "#FF7777";
   /**
    * Runs a server-side function to translate the user-selected text and update
    * the sidebar UI with the resulting translation.
@@ -146,7 +147,7 @@
 
   function outputPars(par_array, element){
     for (var par_dict of par_array) {
-    var div = '<div id="header" class="result" onclick="toggleChildren(this)">' + "<b>" + par_dict["cat"] + "</b>\n";
+        var div = '<div id="header" class="result" onclick="toggleChildren(this)">' + "<b>" + par_dict["cat"] + "</b>\n";
     for (var i = 0; i<par_dict["answers"].length; i++){
       div += '<div id="child" class='+par_dict["valid"][i]+'>' + par_dict["answers"][i] + ": " + par_dict["wordlengths"][i] + " (" + par_dict["charlengths"][i] + ")" + '</div>';
     }
@@ -159,7 +160,7 @@
     });
     var elements = document.querySelectorAll('.bad');
     elements.forEach(function(element){
-        element.style.color = "red";
+        element.style.color = red_color;
     });
     updateVisibility();
   }
@@ -168,7 +169,7 @@
   {
     var cb_check = document.querySelector('#toolong-cb').checked;
     var opp_vis = "block";
-    var color = "red";
+    var color = red_color;
     if (cb_check){
       opp_vis = "none";
       color = "black";
@@ -194,7 +195,7 @@
   {
     var cb_check = document.querySelector('#toolong-cb').checked;
     var opp_vis = "block";
-    var color = "red";
+    var color = red_color;
     if (cb_check){
       opp_vis = "none";
       color = "black";
