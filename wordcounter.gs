@@ -55,14 +55,14 @@ function showSidebar() {
  *
  * @return {Array.<string>} The selected text.
  */
-function processPars(tu_words, tu_chars, bo_words, bo_chars){
+function processPars(tu_words, tu_chars, bo_words, bo_chars, headerstf){
 
   var h1 = DocumentApp.ParagraphHeading.HEADING1;
   var h2 = DocumentApp.ParagraphHeading.HEADING2;
   var norm = DocumentApp.ParagraphHeading.NORMAL;
 
   var all_qs = [];
-  var cat = "start";
+  var cat = "";
   var answers = [];
   var wordlengths = [];
   var charlengths = [];
@@ -71,9 +71,11 @@ function processPars(tu_words, tu_chars, bo_words, bo_chars){
   var temp_wl = 0;
   var temp_answers = "";
   var question_array = [];
-  var answer_array = [];
-  const bonus_question_locs = [0,1,3,5];
-  const bonus_answer_locs = [2,4,6];
+  var is_answer_array = [];
+  var bonus_context = false;
+  var bonus_answer_counter = 0;
+  var bonus_part_regex = /\[10[emh]?\]/g;
+  var answer_regex = /ANSWER:/g;
 
   const doc = DocumentApp.getActiveDocument();
   const body = doc.getBody();
@@ -100,93 +102,115 @@ function processPars(tu_words, tu_chars, bo_words, bo_chars){
         charlengths = [];
         valid = [];
     }
+    else if (parhead != norm && headerstf){
+        all_qs.push({cat: cat, answers: answers, wordlengths: wordlengths, charlengths: charlengths, valid: valid});
+        cat = partext;
+        answers = [];
+        wordlengths = [];
+        charlengths = [];
+        valid = [];
+    }
     else if (parhead != norm || partext.slice(0, 1) == "<"){
       continue;
     }
     else{
       q_label = partext.indexOf(". ");
-      if(q_label == 1 || q_label == 2)
-      {
+      if(q_label == 1 || q_label == 2){
         partext=partext.slice(q_label+2);
       }
       partext_array = splitComponent(partext);
       for(var i=0;i<partext_array.length;i++)
       {
-        if (partext_array[i].slice(0,7) != "ANSWER:")
-        {
-          question_array.push(removeInstructions(partext_array[i]));
-          answer_array.push(false);
+        if (partext_array[i].search(bonus_part_regex)==0){
+          if(!bonus_context){
+            bonus_context = true;
+          }
+          question_array.push(removeInstructions(partext_array[i].replace(bonus_part_regex, '')));
+          is_answer_array.push(false);
         }
+        else if (partext_array[i].search(answer_regex)==0){
+          if (bonus_context){
+            bonus_answer_counter++;
+            question_array.push(extractPrimaryAnswer(partext_array[i].replace(answer_regex, '')));
+            is_answer_array.push(true);
+            if (bonus_answer_counter==3){
+              temp_answers = "";
+              temp_cl = 0;
+              temp_wl = 0;
+              for (var bl = 0; bl<is_answer_array.length;bl++){
+                if (is_answer_array[bl]){
+                  temp_answers += "/"+question_array[bl];
+                }
+                else{
+                  temp_cl += question_array[bl].length;
+                  temp_wl += question_array[bl].split(" ").length;
+                }
+              }
+              answers.push(temp_answers.slice(1));
+              charlengths.push(temp_cl);
+              wordlengths.push(temp_wl);
+              if (temp_cl > bo_chars || temp_wl > bo_words){valid.push("bad");}
+              else{valid.push("good");}
+              question_array = [];
+              is_answer_array = [];
+              bonus_context = false;
+              bonus_answer_counter = 0;
+            }
+          }
+          else{
+              question_array.push(extractPrimaryAnswer(partext_array[i].replace(answer_regex, '')));
+              answers.push(question_array[question_array.length-1]);
+              temp_cl = 0;
+              temp_wl = 0;
+              for (var tul = 0;tul<question_array.length-1;tul++){
+                temp_cl += question_array[tul].length;
+                temp_wl += question_array[tul].split(" ").length;
+              }
+              charlengths.push(temp_cl);
+              wordlengths.push(temp_wl);
+              if (temp_cl > tu_chars || temp_wl > tu_words){valid.push("bad");}
+              else{valid.push("good");}
+              question_array = [];
+              is_answer_array = [];
+            }
+          }
         else{
-          question_array.push(extractPrimaryAnswer(partext_array[i].slice(8)));
-          answer_array.push(true);
-        }
-        if (question_array.length == 2 && answer_array[1] == true)
-        {
-          answers.push(question_array[1]);
-          charlengths.push(question_array[0].length);
-          wordlengths.push(question_array[0].split(" ").length);
-          if (question_array[0].length > tu_chars || question_array[0].split(" ").length > tu_words){valid.push("bad");}
-          else{valid.push("good");}
-          question_array = [];
-          answer_array = [];
-        }
-        else if (question_array.length == 7 && answer_array[6] == true)
-        {
-          temp_answers = "";
-          temp_cl = 0;
-          temp_wl = 0;
-          for (var bl = 0; bl<bonus_question_locs.length;bl++)
-          {
-            temp_cl += question_array[bonus_question_locs[bl]].length;
-            temp_wl += question_array[bonus_question_locs[bl]].split(" ").length;
-          }
-          for (var al = 0; al<bonus_answer_locs.length;al++)
-          {
-            temp_answers += "/"+question_array[bonus_answer_locs[al]];
-          }
-          answers.push(temp_answers.slice(1));
-          charlengths.push(temp_cl);
-          wordlengths.push(temp_wl);
-          if (temp_cl > bo_chars || temp_wl > bo_words){valid.push("bad");}
-          else{valid.push("good");}
-          question_array = [];
-          answer_array = [];
+          question_array.push(removeInstructions(partext_array[i]));
+          is_answer_array.push(false);
         }
       }
     }
   }
   all_qs.push({cat: cat, answers: answers, wordlengths: wordlengths, charlengths: charlengths, valid: valid});
-  for(i=all_qs.length-1;i>-1;i--){
-    if (all_qs[i].answers.length < 1)
-    {
-      all_qs.splice(i, 1);
-    }
-  }
+  // for(i=all_qs.length-1;i>-1;i--){
+  //   if (all_qs[i].answers.length < 1){
+  //     all_qs.splice(i, 1);
+  //   }
+  // }
   return all_qs;
 }
 
 
 function removeInstructions(text){
-  while (text.indexOf('("') >= 0)
-  {
-    text = text.slice(0, text.indexOf('("')) + text.slice(text.indexOf('")')+3);
+  var removedtext = text.trim().replace(/\s{2,}/g, ' ').replace(/<.*?>/g, '');
+  while (removedtext.indexOf('("') >= 0){
+    removedtext = removedtext.slice(0, removedtext.indexOf('("')) + removedtext.slice(removedtext.indexOf('")')+3);
   }
-  while (text.indexOf('(“') >= 0)
-  {
-    text = text.slice(0, text.indexOf('(“')) + text.slice(text.indexOf('”)')+3);
+  while (removedtext.indexOf('(“') >= 0){
+    removedtext = removedtext.slice(0, removedtext.indexOf('(“')) + removedtext.slice(removedtext.indexOf('”)')+3);
   }
-  powermarkloc = text.indexOf("(*)");
+  powermarkloc = removedtext.indexOf("(*)");
   if (powermarkloc >= 0){
-    text = text.slice(0, powermarkloc) + text.slice(powermarkloc+4)
+    removedtext = removedtext.slice(0, powermarkloc) + removedtext.slice(powermarkloc+4)
   }
-  if (text.indexOf('Note to') == 0 || text.indexOf('Description acceptable') == 0){
-    text = text.slice(text.indexOf(".")+2);
+  if (removedtext.indexOf('Note to') == 0 || removedtext.indexOf('Description acceptable') == 0){
+    removedtext = removedtext.slice(removedtext.indexOf(".")+2);
   }
-  return text.trim().replace(/\s{2,}/g, ' ');
+  return removedtext.trim();
 }
 
 function extractPrimaryAnswer(answertext){
+  answertext.trim();
   bracket_start = answertext.indexOf("[");
   paren_start = answertext.indexOf("(");
   if (paren_start == 0 ){
@@ -203,23 +227,31 @@ function extractPrimaryAnswer(answertext){
   else if (paren_start > -1){
     answertext = answertext.slice(0, paren_start-1);
   }
-  return answertext.trim().replace(/\s{2,}/g, ' ');
+  return answertext.trim();
 }
 
 function splitComponent(partext)
 {
+  var bonus_part_regex = /\[10[emh]?\]/g, result, indices = [];
+  var answer_regex = /ANSWER:/g
+  while ( (result = bonus_part_regex.exec(partext)) ){
+    indices.push(result.index);
+  }   
+  while ( (result = answer_regex.exec(partext)) ){
+    indices.push(result.index);
+  }
+  indices.sort();  
   var final_par_array = [];
-  par_array_1 = partext.replace(/<.*?>/g, "").split(/\[10[emh]?\]/g)
-  for(var i=0;i<par_array_1.length;i++){
-    if(par_array_1[i].length < 3){continue}
-    answerloc = par_array_1[i].indexOf("ANSWER:");
-    if (answerloc > 0){
-    final_par_array.push(par_array_1[i].slice(0, answerloc));
-    final_par_array.push(par_array_1[i].slice(answerloc));
-    }
-    else{
-      final_par_array.push(par_array_1[i]);
+  for(i=indices.length-1;i>-1;i--){
+    final_par_array.push(partext.slice(indices[i]).trim());
+    partext = partext.slice(0, indices[i]).trim();
+  }
+  final_par_array.push(partext.trim());
+  for(i=final_par_array.length-1;i>-1;i--){
+    if (final_par_array[i].length < 10){
+      final_par_array.splice(i,1);
     }
   }
+  final_par_array.reverse();
   return final_par_array;
 }
