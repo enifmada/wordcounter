@@ -14,7 +14,7 @@ A Google Docs Add-On to calculate the word and character count of all quizbowl q
 9. Click "Update" whenever you want a word/character count.
 
 <b>Wordcounter in action</b> (on WORKSHOP 2022 leftover science questions):
-<img width="2161" alt="wordcounter_updated" src="https://user-images.githubusercontent.com/8041675/184432235-f82096d3-0f69-41db-970a-01736328d64e.png">
+<img width="1280" alt="wordcounter_updated_better" src="https://user-images.githubusercontent.com/8041675/184692218-8e0c208a-124c-4fe0-957c-c58d26950c2b.png">
 
 
 <b>Features:</b>
