@@ -28,7 +28,7 @@ Automatically excludes:
 
 -answerlines within bonuses
 
--[10] or [10e/m/h] at beginning of bonus parts
+-\[10\] or \[10e/m/h\] at beginning of bonus parts
 
 -weird formatting (e.g. double spaces after sentences).
 
@@ -40,7 +40,9 @@ Additional features:
 
 -toggle viewing only questions that are too long or all questions.
 
+-counts are now displayed in a nice table (thanks to Jon Settle for the suggestion)
+
 <br>
 
-feel free to discord me/message me/github (?) me with feature requests!
+feel free to discord/message/github (?) me with feature requests!
 
