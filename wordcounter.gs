@@ -210,24 +210,7 @@ function removeInstructions(text){
 }
 
 function extractPrimaryAnswer(answertext){
-  answertext.trim();
-  bracket_start = answertext.indexOf("[");
-  paren_start = answertext.indexOf("(");
-  if (paren_start == 0 ){
-    answertext = answertext.slice(answertext.indexOf(")")+1);
-    paren_start = answertext.indexOf("(");
-    bracket_start = answertext.indexOf("[");
-  }
-  if (bracket_start > -1 && paren_start > -1){
-    answertext = answertext.slice(0, Math.min(bracket_start, paren_start)-1);
-  }
-  else if (bracket_start > -1){
-    answertext = answertext.slice(0, bracket_start-1);
-  }
-  else if (paren_start > -1){
-    answertext = answertext.slice(0, paren_start-1);
-  }
-  return answertext.trim();
+  return answertext.replace(/<.*?>/g, '').replace(/\(.*?\)/g, '').replace(/\[.*?\]/g, '').trim();
 }
 
 function splitComponent(partext)
