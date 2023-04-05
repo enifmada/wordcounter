@@ -79,12 +79,10 @@ function processPars(tu_words, tu_chars, bo_words, bo_chars, headerstf){
 
   const doc = DocumentApp.getActiveDocument();
   const body = doc.getBody();
+  const pars = body.getParagraphs();
   
-  var searchType = DocumentApp.ElementType.PARAGRAPH;
-  var searchResult = null;
-
-  while (searchResult = body.findElement(searchType, searchResult)) {
-    var par = searchResult.getElement().asParagraph();
+  for (par_i = 0; par_i < pars.length; par_i++) {
+    var par = pars[par_i];
     var parhead = par.getHeading();
     var partext = removeInstructions(par.getText());
   
